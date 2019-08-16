@@ -19,7 +19,7 @@ sub proc_file { "/proc/$$/status" }
 sub send_mem_event {
     my ($ctx, $real, $new) = @_;
 
-    my $file = $self->proc_file();
+    my $file = proc_file();
     return unless -f $file;
 
     my $stats;
