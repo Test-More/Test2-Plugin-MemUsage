@@ -2,7 +2,7 @@ package Test2::Plugin::MemUsage;
 use strict;
 use warnings;
 
-our $VERSION = '0.002002';
+our $VERSION = '0.002003';
 
 use Test2::API qw/test2_add_callback_exit/;
 
