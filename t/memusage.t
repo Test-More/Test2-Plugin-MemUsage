@@ -16,6 +16,10 @@ BEGIN {
     Test2::Plugin::MemUsage->import();
 
     def ok => (scalar(@CALLBACKS), "importing the module does add a callback");
+
+    Test2::Plugin::MemUsage->import();
+
+    def ok => (scalar(@CALLBACKS) == 1, "second import is a no-op (callback registered once)");
 }
 
 use Test2::Tools::Basic;
