@@ -55,6 +55,12 @@
       _collect_ps returns numeric/positive/in-range values with kB
       units; both subtests skip when ps is missing (exit 127 / fork
       failure) and fail when ps is present but misbehaves
+    - Add real-system subtests to t/win32.t that verify the real
+      Win32::Process::Memory returns the hash shape we assume and
+      that _collect_win32 returns meaningful values; the fake module
+      injection is now conditional so the real module is preferred
+      when installed, and both new subtests skip off-MSWin32 or when
+      Win32::Process::Memory is not installed
 
 0.002003  2020-02-26 08:09:20-08:00 America/Los_Angeles
 
