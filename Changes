@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.002004  2026-04-25 07:18:08-07:00 America/Los_Angeles
+
     - Fix broken grep filter in send_mem_event that referenced @_ of
       the outer sub instead of the grep iterator
     - Match \s+ instead of a literal space between value and unit in
