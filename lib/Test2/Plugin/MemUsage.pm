@@ -56,10 +56,28 @@ sub _collect_ps {
     return %mem;
 }
 
+sub _collect_win32 {
+    return unless eval { require Win32::Process::Memory; 1 };
+
+    my $info = eval { Win32::Process::Memory::GetProcessMemoryInfo($$) }
+        or return;
+
+    my $rss  = $info->{WorkingSetSize}     || 0;
+    my $peak = $info->{PeakWorkingSetSize} || 0;
+    my $size = $info->{PagefileUsage}      || 0;
+
+    my %mem = _empty_mem();
+    $mem{rss}  = [int($rss  / 1024), 'kB'] if $rss;
+    $mem{peak} = [int($peak / 1024), 'kB'] if $peak;
+    $mem{size} = [int($size / 1024), 'kB'] if $size;
+    return %mem;
+}
+
 sub _collector_for_os {
     my $os = shift // $^O;
-    return \&_collect_proc if $os eq 'linux' || $os eq 'cygwin' || $os eq 'gnukfreebsd';
-    return \&_collect_ps   if $os eq 'darwin' || $os =~ /bsd$/;
+    return \&_collect_proc  if $os eq 'linux' || $os eq 'cygwin' || $os eq 'gnukfreebsd';
+    return \&_collect_ps    if $os eq 'darwin' || $os =~ /bsd$/;
+    return \&_collect_win32 if $os eq 'MSWin32';
     return undef;
 }
 
