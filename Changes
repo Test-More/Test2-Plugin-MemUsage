@@ -6,6 +6,8 @@
       the Vm* regexes
     - Warn instead of die when opening or closing the procfile fails,
       so the exit callback does not abort the test process
+    - Use -e instead of -f when checking for the procfile, so non-Linux
+      procfs implementations are not rejected
 
 0.002003  2020-02-26 08:09:20-08:00 America/Los_Angeles
 
