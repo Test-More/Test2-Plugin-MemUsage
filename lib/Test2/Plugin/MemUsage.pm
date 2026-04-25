@@ -16,9 +16,9 @@ sub import {
 
 sub proc_file { "/proc/$$/status" }
 
-sub send_mem_event {
-    my ($ctx, $real, $new) = @_;
+sub _empty_mem { (peak => ['NA', ''], size => ['NA', ''], rss => ['NA', '']) }
 
+sub _collect_proc {
     my $file = proc_file();
     return unless -e $file;
 
@@ -32,11 +32,27 @@ sub send_mem_event {
 
     return unless $stats;
 
-    my %mem = (peak => ['NA', ''], size => ['NA', ''], rss  => ['NA', '']);
+    my %mem = _empty_mem();
     $mem{peak} = [$1, $2] if $stats =~ m/VmPeak:\s+(\d+)\s+(\S+)/;
     $mem{size} = [$1, $2] if $stats =~ m/VmSize:\s+(\d+)\s+(\S+)/;
     $mem{rss}  = [$1, $2] if $stats =~ m/VmRSS:\s+(\d+)\s+(\S+)/;
 
+    return %mem;
+}
+
+sub _collector_for_os {
+    my $os = shift // $^O;
+    return \&_collect_proc if $os eq 'linux' || $os eq 'cygwin' || $os eq 'gnukfreebsd';
+    return undef;
+}
+
+sub collect_mem { my $c = _collector_for_os(); $c ? $c->() : () }
+
+sub send_mem_event {
+    my ($ctx, $real, $new) = @_;
+
+    my %mem = collect_mem();
+    return unless %mem;
     return unless grep { $_->[0] ne 'NA' } values %mem;
 
     $mem{details} = "rss:  $mem{rss}->[0]$mem{rss}->[1]\nsize: $mem{size}->[0]$mem{size}->[1]\npeak: $mem{peak}->[0]$mem{peak}->[1]";
