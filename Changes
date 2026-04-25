@@ -29,6 +29,9 @@
     - Add t/proc.t covering _collect_proc happy path, missing procfile,
       empty procfile, files without Vm* lines, tab-separated values,
       and partial Vm* presence
+    - Add t/ps.t covering _collect_ps via stubbed ps_command (happy /
+      empty / unparseable) plus an opportunistic real-ps subtest;
+      skips on MSWin32 and any host without a usable shell echo
 
 0.002003  2020-02-26 08:09:20-08:00 America/Los_Angeles
 
