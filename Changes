@@ -22,6 +22,10 @@
       acts as a last-resort collector on platforms with no native
       backend; recommend BSD::Resource in dist.ini. Also document
       the platform support matrix in POD
+    - Add t/dispatch.t covering _collector_for_os table, _augment_peak
+      fill / preserve / no-fallback, collect_mem with no collector
+      and no fallback, and send_mem_event short-circuits for empty
+      and all-NA cases
 
 0.002003  2020-02-26 08:09:20-08:00 America/Los_Angeles
 
