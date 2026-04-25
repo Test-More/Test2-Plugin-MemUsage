@@ -17,6 +17,11 @@
       remains NA there unless BSD::Resource is available)
     - Add MSWin32 support via Win32::Process::Memory (recommended,
       not required) and recommend it in dist.ini
+    - Add BSD::Resource getrusage(RUSAGE_SELF) fallback that fills
+      peak RSS when the primary collector did not provide one and
+      acts as a last-resort collector on platforms with no native
+      backend; recommend BSD::Resource in dist.ini. Also document
+      the platform support matrix in POD
 
 0.002003  2020-02-26 08:09:20-08:00 America/Los_Angeles
 

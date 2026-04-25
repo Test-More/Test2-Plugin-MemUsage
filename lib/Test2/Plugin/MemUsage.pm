@@ -81,7 +81,36 @@ sub _collector_for_os {
     return undef;
 }
 
-sub collect_mem { my $c = _collector_for_os(); $c ? $c->() : () }
+sub _maxrss_kb {
+    return unless eval { require BSD::Resource; 1 };
+    my @ru = BSD::Resource::getrusage(BSD::Resource::RUSAGE_SELF()) or return;
+    my $maxrss = $ru[2];
+    return unless defined $maxrss && $maxrss > 0;
+    return $^O eq 'darwin' ? int($maxrss / 1024) : $maxrss;
+}
+
+sub _augment_peak {
+    my %mem = @_;
+    return %mem if !exists $mem{peak} || $mem{peak}->[0] ne 'NA';
+
+    my $kb = _maxrss_kb() // return %mem;
+    $mem{peak} = [$kb, 'kB'];
+    return %mem;
+}
+
+sub collect_mem {
+    my $c = _collector_for_os();
+    my %mem = $c ? $c->() : ();
+
+    unless (%mem) {
+        my $kb = _maxrss_kb() // return ();
+        %mem = _empty_mem();
+        $mem{peak} = [$kb, 'kB'];
+        return %mem;
+    }
+
+    return _augment_peak(%mem);
+}
 
 sub send_mem_event {
     my ($ctx, $real, $new) = @_;
@@ -123,10 +152,36 @@ __END__
 
 Test2::Plugin::MemUsage - Collect and display memory usage information.
 
-=head1 CAVEAT - UNIX ONLY
+=head1 PLATFORM SUPPORT
 
-Currently this only works on unix systems that provide C</proc/PID/status>
-access. For all other systems this plugin is essentially a no-op.
+The plugin selects a memory collector based on C<$^O>:
+
+=over 4
+
+=item Linux, Cygwin, GNU/kFreeBSD
+
+Reads C</proc/PID/status>. Reports rss, size (VmSize), and peak (VmPeak).
+
+=item macOS (darwin), *BSD
+
+Shells out to C<ps -o rss=,vsz= -p $$>. Reports rss and size; peak is
+NA unless L<BSD::Resource> is installed (see below).
+
+=item MSWin32
+
+Uses L<Win32::Process::Memory> if installed to call
+C<GetProcessMemoryInfo>. Reports rss (WorkingSetSize), peak
+(PeakWorkingSetSize), and size (PagefileUsage).
+
+=item Other / fallback
+
+If L<BSD::Resource> is installed, C<getrusage> is used to fill in a
+peak RSS value when the primary collector did not provide one (or
+when no native collector matched the platform at all).
+
+=back
+
+If no collector and no fallback applies, the plugin is a silent no-op.
 
 =head1 DESCRIPTION
 
