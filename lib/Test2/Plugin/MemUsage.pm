@@ -20,7 +20,7 @@ sub send_mem_event {
     my ($ctx, $real, $new) = @_;
 
     my $file = proc_file();
-    return unless -f $file;
+    return unless -e $file;
 
     my $stats;
     {
