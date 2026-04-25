@@ -61,6 +61,11 @@
       injection is now conditional so the real module is preferred
       when installed, and both new subtests skip off-MSWin32 or when
       Win32::Process::Memory is not installed
+    - Add real-system subtests to t/getrusage.t that verify the real
+      BSD::Resource::getrusage returns at least 3 fields with a
+      numeric ru_maxrss and that _maxrss_kb returns a meaningful
+      value; the fake module injection is now conditional so the
+      real module is preferred when installed
 
 0.002003  2020-02-26 08:09:20-08:00 America/Los_Angeles
 
