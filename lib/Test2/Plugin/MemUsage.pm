@@ -47,9 +47,15 @@ sub send_mem_event {
         info   => [{tag => 'MEMORY', details => $mem{details}}],
 
         harness_job_fields => [
-            {name => 'mem_rss',  details => $mem{rss}->[0] . $mem{rss}->[1]},
-            {name => 'mem_size', details => $mem{size}->[0] . $mem{size}->[1]},
-            {name => 'mem_peak', details => $mem{peak}->[0] . $mem{peak}->[1]},
+            map {
+                my $k = $_;
+                my ($v, $u) = @{$mem{$k}};
+                +{
+                    name    => "mem_$k",
+                    details => "$v$u",
+                    data    => {value => ($v eq 'NA' ? undef : $v + 0), units => $u},
+                };
+            } qw/rss size peak/,
         ],
     );
 }
