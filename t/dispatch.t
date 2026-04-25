@@ -17,10 +17,12 @@ subtest collector_for_os => sub {
     is(Test2::Plugin::MemUsage::_collector_for_os('freebsd'),     $ps,   "freebsd -> ps");
     is(Test2::Plugin::MemUsage::_collector_for_os('openbsd'),     $ps,   "openbsd -> ps");
     is(Test2::Plugin::MemUsage::_collector_for_os('netbsd'),      $ps,   "netbsd -> ps");
+    is(Test2::Plugin::MemUsage::_collector_for_os('solaris'),     $ps,   "solaris -> ps");
+    is(Test2::Plugin::MemUsage::_collector_for_os('aix'),         $ps,   "aix -> ps");
+    is(Test2::Plugin::MemUsage::_collector_for_os('hpux'),        $ps,   "hpux -> ps");
     is(Test2::Plugin::MemUsage::_collector_for_os('MSWin32'),     $win,  "MSWin32 -> win32");
-    is(Test2::Plugin::MemUsage::_collector_for_os('solaris'),     undef, "solaris -> undef");
-    is(Test2::Plugin::MemUsage::_collector_for_os('aix'),         undef, "aix -> undef");
     is(Test2::Plugin::MemUsage::_collector_for_os('haiku'),       undef, "unknown OS -> undef");
+    is(Test2::Plugin::MemUsage::_collector_for_os('riscos'),      undef, "another unknown OS -> undef");
 };
 
 subtest augment_peak_fills_NA => sub {

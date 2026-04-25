@@ -76,7 +76,8 @@ sub _collect_win32 {
 sub _collector_for_os {
     my $os = shift // $^O;
     return \&_collect_proc  if $os eq 'linux' || $os eq 'cygwin' || $os eq 'gnukfreebsd';
-    return \&_collect_ps    if $os eq 'darwin' || $os =~ /bsd$/;
+    return \&_collect_ps    if $os eq 'darwin' || $os =~ /bsd$/
+                             || $os eq 'solaris' || $os eq 'aix' || $os eq 'hpux';
     return \&_collect_win32 if $os eq 'MSWin32';
     return undef;
 }
@@ -162,7 +163,7 @@ The plugin selects a memory collector based on C<$^O>:
 
 Reads C</proc/PID/status>. Reports rss, size (VmSize), and peak (VmPeak).
 
-=item macOS (darwin), *BSD
+=item macOS (darwin), *BSD, Solaris, AIX, HP-UX
 
 Shells out to C<ps -o rss=,vsz= -p $$>. Reports rss and size; peak is
 NA unless L<BSD::Resource> is installed (see below).
