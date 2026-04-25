@@ -38,16 +38,46 @@ subtest unparseable_output => sub {
     is(\@out, [], "unparseable -> empty");
 };
 
-subtest real_ps_if_present => sub {
-    my $rss_vsz = qx{ps -o rss=,vsz= -p $$ 2>/dev/null};
-    skip_all "real ps not usable on this host"
-        unless defined $rss_vsz && $rss_vsz =~ /^\s*\d+\s+\d+\s*$/m;
+# Real-system compatibility: invoke the actual ps_command and verify
+# its output shape matches what our mocks/parser assume. Skip cleanly
+# when ps is missing (exit 127 / $? == -1); fail loudly when ps is
+# present but exits non-zero or returns output we cannot parse.
+subtest real_ps_matches_mock_shape => sub {
+    my $cmd = Test2::Plugin::MemUsage::ps_command();
+    my $out = qx{$cmd 2>/dev/null};
+    my $raw = $?;
+
+    skip_all "ps not executable: $!"   if $raw == -1;
+    skip_all "ps not in PATH (exit 127)" if ($raw >> 8) == 127;
+
+    is($raw >> 8, 0, "ps exits 0");
+    like($out, qr/^\s*\d+\s+\d+\s*$/m,
+        "ps output matches our parser regex");
+};
+
+# Real-system integration: drive _collect_ps end to end against the
+# host's ps and assert the returned values are numeric, positive,
+# correctly unitted, and within a sane range. Same skip rules as
+# above; if ps is present and the data is wrong, fail.
+subtest real_collect_ps_meaningful => sub {
+    my $cmd   = Test2::Plugin::MemUsage::ps_command();
+    my $probe = qx{$cmd 2>/dev/null};
+    my $raw   = $?;
+
+    skip_all "ps not executable: $!"   if $raw == -1;
+    skip_all "ps not in PATH (exit 127)" if ($raw >> 8) == 127;
+    skip_all "ps output not parseable" unless $probe =~ /^\s*\d+\s+\d+\s*$/m;
 
     my %mem = Test2::Plugin::MemUsage::_collect_ps();
-    like($mem{rss}->[0],  qr/^\d+$/, "rss numeric from real ps");
-    like($mem{size}->[0], qr/^\d+$/, "size numeric from real ps");
-    is($mem{rss}->[1],  'kB', "rss units kB");
-    is($mem{size}->[1], 'kB', "size units kB");
+    ok(%mem, "got mem hash");
+    for my $k (qw/rss size/) {
+        my ($v, $u) = @{$mem{$k}};
+        like($v, qr/^\d+$/,         "$k numeric");
+        ok($v + 0 > 0,              "$k > 0");
+        ok($v + 0 < 100_000_000,    "$k < 100 GB sanity");
+        is($u, 'kB',                "$k units kB");
+    }
+    is($mem{peak}, ['NA', ''], "peak NA (ps does not surface peak RSS)");
 };
 
 done_testing;
