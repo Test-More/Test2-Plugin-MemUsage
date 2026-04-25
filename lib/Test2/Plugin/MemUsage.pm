@@ -24,10 +24,10 @@ sub send_mem_event {
 
     my $stats;
     {
-        open(my $fh, '<', $file) or die "Could not open file '$file' (<): $!";
+        open(my $fh, '<', $file) or warn("Could not open file '$file' (<): $!"), return;
         local $/;
         $stats = <$fh>;
-        close($fh) or die "Could not close file '$file': $!";
+        close($fh) or warn "Could not close file '$file': $!";
     }
 
     return unless $stats;
