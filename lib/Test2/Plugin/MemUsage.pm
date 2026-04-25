@@ -40,9 +40,26 @@ sub _collect_proc {
     return %mem;
 }
 
+sub ps_command { "ps -o rss=,vsz= -p $$" }
+
+sub _collect_ps {
+    my $cmd = ps_command();
+    my $out = `$cmd 2>/dev/null`;
+    return unless defined $out && length $out;
+
+    my ($rss, $vsz) = $out =~ /^\s*(\d+)\s+(\d+)\s*$/m
+        or return;
+
+    my %mem = _empty_mem();
+    $mem{rss}  = [$rss, 'kB'];
+    $mem{size} = [$vsz, 'kB'];
+    return %mem;
+}
+
 sub _collector_for_os {
     my $os = shift // $^O;
     return \&_collect_proc if $os eq 'linux' || $os eq 'cygwin' || $os eq 'gnukfreebsd';
+    return \&_collect_ps   if $os eq 'darwin' || $os =~ /bsd$/;
     return undef;
 }
 
