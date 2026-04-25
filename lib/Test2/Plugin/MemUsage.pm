@@ -37,7 +37,7 @@ sub send_mem_event {
     $mem{size} = [$1, $2] if $stats =~ m/VmSize:\s+(\d+) (\S+)/;
     $mem{rss}  = [$1, $2] if $stats =~ m/VmRSS:\s+(\d+) (\S+)/;
 
-    return unless grep { $_[0] ne 'NA' } values %mem;
+    return unless grep { $_->[0] ne 'NA' } values %mem;
 
     $mem{details} = "rss:  $mem{rss}->[0]$mem{rss}->[1]\nsize: $mem{size}->[0]$mem{size}->[1]\npeak: $mem{peak}->[0]$mem{peak}->[1]";
 
