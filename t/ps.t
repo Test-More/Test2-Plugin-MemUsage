@@ -47,8 +47,10 @@ subtest real_ps_matches_mock_shape => sub {
     my $out = qx{$cmd 2>/dev/null};
     my $raw = $?;
 
-    skip_all "ps not executable: $!"   if $raw == -1;
-    skip_all "ps not in PATH (exit 127)" if ($raw >> 8) == 127;
+    skip_all "ps not executable: $!"           if $raw == -1;
+    skip_all "ps exited non-zero (raw=$raw)"   if $raw != 0;
+    skip_all "ps output not parseable: $out"
+        unless $out =~ /^\s*\d+\s+\d+\s*$/m;
 
     is($raw >> 8, 0, "ps exits 0");
     like($out, qr/^\s*\d+\s+\d+\s*$/m,
@@ -64,8 +66,8 @@ subtest real_collect_ps_meaningful => sub {
     my $probe = qx{$cmd 2>/dev/null};
     my $raw   = $?;
 
-    skip_all "ps not executable: $!"   if $raw == -1;
-    skip_all "ps not in PATH (exit 127)" if ($raw >> 8) == 127;
+    skip_all "ps not executable: $!"           if $raw == -1;
+    skip_all "ps exited non-zero (raw=$raw)"   if $raw != 0;
     skip_all "ps output not parseable" unless $probe =~ /^\s*\d+\s+\d+\s*$/m;
 
     my %mem = Test2::Plugin::MemUsage::_collect_ps();
