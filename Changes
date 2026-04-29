@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.002006  2026-04-28 22:09:45-07:00 America/Los_Angeles
+
     - Add [PruneCruft] to dist.ini so blib/ and pm_to_blib are excluded
       from the released tarball (GH #1)
     - Drop the "< 100 GB sanity" upper bound on rss/size in t/ps.t real
