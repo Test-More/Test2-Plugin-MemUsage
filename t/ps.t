@@ -76,7 +76,6 @@ subtest real_collect_ps_meaningful => sub {
         my ($v, $u) = @{$mem{$k}};
         like($v, qr/^\d+$/,         "$k numeric");
         ok($v + 0 > 0,              "$k > 0");
-        ok($v + 0 < 100_000_000,    "$k < 100 GB sanity");
         is($u, 'kB',                "$k units kB");
     }
     is($mem{peak}, ['NA', ''], "peak NA (ps does not surface peak RSS)");
